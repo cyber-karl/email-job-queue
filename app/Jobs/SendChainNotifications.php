@@ -10,20 +10,23 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Notification;
 
-class SendSubscribedNotification implements ShouldQueue
+class SendChainNotifications implements ShouldQueue
 {
     use InteractsWithQueue, Queueable, SerializesModels;
 
-    public Email $email;
+    private Email $email;
+    private int $index;
 
     /**
      * Create a new job instance.
      *
      * @param Email $email
+     * @param int $index
      */
-    public function __construct(Email $email)
+    public function __construct(Email $email, int $index)
     {
         $this->email = $email;
+        $this->index = $index;
     }
 
     /**
@@ -31,7 +34,6 @@ class SendSubscribedNotification implements ShouldQueue
      */
     public function handle(): void
     {
-        Notification::send($this->email, new SubscribedNotification);
-        $this->email->update(['notified_at' => now()]);
+        Notification::send($this->email, new SubscribedNotification(true, $this->index));
     }
 }
